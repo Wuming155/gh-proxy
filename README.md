@@ -1,4 +1,4 @@
-# CF-GitHub-Proxy
+# gh-proxy
 
 基于 **Cloudflare Workers** 的 GitHub 文件与 API 加速代理。在原始 GitHub 链接前加上本项目的 Worker 地址，即可加速访问 `release` 资源、`archive` 源码包、仓库文件、`gist` 以及 `GitHub API`，并支持 `git clone`。
 
