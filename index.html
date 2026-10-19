@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>GitHub 文件及 API 加速</title>
+<style>
+  :root{
+    --bg:#f4f5f9;
+    --surface:#ffffff;
+    --surface-2:#f6f7fb;
+    --field:#fbfbfd;
+    --fg:#12141a;
+    --muted:#5d6675;
+    --faint:#8b93a1;
+    --border:#e7e9ef;
+    --border-strong:#dcdfe8;
+    --accent:#5b52e8;
+    --accent-2:#7f6cf6;
+    --accent-soft:rgba(91,82,232,.10);
+    --ring:rgba(91,82,232,.22);
+    --ok:#12805c;
+    --warn:#b45309;
+    --shadow:0 1px 2px rgba(18,20,26,.04), 0 12px 32px -12px rgba(18,20,26,.14);
+    --radius:16px;
+    --radius-sm:11px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a0c11;
+      --surface:#11141b;
+      --surface-2:#161a22;
+      --field:#0e1117;
+      --fg:#e9ebf0;
+      --muted:#9aa2b1;
+      --faint:#727b8a;
+      --border:#232833;
+      --border-strong:#2d3340;
+      --accent:#8b8dff;
+      --accent-2:#a99cff;
+      --accent-soft:rgba(139,141,255,.12);
+      --ring:rgba(139,141,255,.28);
+      --ok:#3ddc97;
+      --warn:#f3b657;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 18px 44px -16px rgba(0,0,0,.7);
+    }
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--fg); min-height:100vh;
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    padding:56px 20px 72px;
+  }
+  /* 氛围背景：极浅的径向色晕，纯 CSS，无外部资源 */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(52vw 46vw at 12% -6%, rgba(91,82,232,.20), transparent 62%),
+      radial-gradient(44vw 40vw at 92% 4%, rgba(127,108,246,.16), transparent 58%),
+      radial-gradient(46vw 44vw at 50% 108%, rgba(45,190,170,.12), transparent 60%);
+  }
+  @media (prefers-color-scheme: dark){
+    body::before{
+      background:
+        radial-gradient(54vw 48vw at 10% -8%, rgba(91,82,232,.26), transparent 60%),
+        radial-gradient(46vw 42vw at 94% 2%, rgba(127,108,246,.20), transparent 56%),
+        radial-gradient(48vw 46vw at 50% 110%, rgba(45,190,170,.14), transparent 60%);
+    }
+  }
+  main{position:relative; z-index:1; width:100%; max-width:768px; margin:0 auto}
+
+  /* ── 头部 ── */
+  .hero{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:26px}
+  .brand{display:flex; align-items:center; gap:14px; min-width:0}
+  .logo{
+    flex:none; width:46px; height:46px; border-radius:14px;
+    display:grid; place-items:center; color:#fff;
+    background:linear-gradient(145deg,var(--accent),var(--accent-2));
+    box-shadow:0 8px 22px -8px var(--accent);
+  }
+  .logo svg{width:26px; height:26px; display:block}
+  h1{font-size:25px; line-height:1.25; letter-spacing:-.02em; margin:0 0 3px; font-weight:750}
+  .sub{margin:0; font-size:13.5px; color:var(--muted)}
+  .sub code, .badge{font-family:var(--mono)}
+  .badge{
+    flex:none; display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:600; color:var(--muted);
+    background:var(--surface); border:1px solid var(--border);
+    padding:6px 11px; border-radius:999px; box-shadow:var(--shadow); white-space:nowrap;
+  }
+  .badge::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent)}
+
+  /* ── 卡片 ── */
+  .panel{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:22px 22px 20px;
+    box-shadow:var(--shadow); margin-bottom:18px;
+  }
+  .panel-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px}
+  .panel-head h2{font-size:15px; letter-spacing:-.01em; margin:0; font-weight:700}
+  .panel-head .tip{font-size:12.5px; color:var(--faint)}
+
+  .field{display:block; margin-bottom:14px}
+  .field-label{display:block; font-size:12.5px; font-weight:600; color:var(--muted); letter-spacing:.01em; margin-bottom:7px}
+  textarea,input{
+    width:100%; font:inherit; color:var(--fg); background:var(--field);
+    border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    padding:13px 15px; outline:none;
+    transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  textarea{min-height:56px; resize:vertical; line-height:1.55}
+  textarea::placeholder,input::placeholder{color:var(--faint)}
+  textarea:focus,input:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* 输出框 + 内嵌复制按钮 */
+  .ig{display:flex; align-items:stretch; gap:8px; background:var(--field); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:4px; transition:border-color .18s ease, box-shadow .18s ease}
+  .ig:focus-within{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
+  #out{
+    flex:1; min-width:0; border:0; background:transparent; padding:9px 11px;
+    font-family:var(--mono); font-size:12.8px; color:var(--fg); word-break:break-all; box-shadow:none;
+  }
+  #out:focus{box-shadow:none; border-color:transparent}
+
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:14px}
+  .btn{
+    font:inherit; font-weight:650; font-size:14px; cursor:pointer; white-space:nowrap;
+    border:1px solid var(--border-strong); background:var(--surface-2); color:var(--fg);
+    border-radius:var(--radius-sm); padding:11px 20px;
+    transition:transform .12s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease, opacity .18s ease;
+  }
+  .btn:hover{border-color:var(--accent); background:var(--accent-soft)}
+  .btn:active{transform:translateY(1px)}
+  .btn-mini{
+    font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap;
+    color:#fff; background:linear-gradient(145deg,var(--accent),var(--accent-2));
+    border:1px solid transparent; border-radius:8px; padding:0 16px;
+    box-shadow:0 8px 18px -11px var(--accent);
+    transition:filter .18s ease, transform .12s ease;
+  }
+  .btn-mini:hover{filter:brightness(1.08)}
+  .btn-mini:active{transform:translateY(1px)}
+
+  .hint{font-size:13px; margin:12px 0 0; display:flex; align-items:center; gap:7px; color:var(--muted)}
+  .hint:empty{display:none}
+  .hint.ok{color:var(--ok)}
+  .hint.warn{color:var(--warn)}
+  .hint::before{content:""; width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.55; flex:none}
+  .note{font-size:12.5px; color:var(--faint); margin:10px 0 0}
+  .note code{font-family:var(--mono)}
+
+  /* ── 示例列表 ── */
+  ul.eg{list-style:none; margin:0; padding:0; display:grid; gap:8px}
+  ul.eg li{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 14px; border-radius:var(--radius-sm);
+    background:var(--surface-2); border:1px solid var(--border);
+    position:relative; overflow:hidden;
+    transition:border-color .18s ease, background .18s ease, transform .12s ease;
+  }
+  ul.eg li::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--accent),var(--accent-2)); opacity:.75}
+  ul.eg li:hover{border-color:var(--accent); transform:translateX(2px)}
+  .eg-k{
+    flex:none; width:78px; font-size:12.5px; font-weight:650; color:var(--muted);
+  }
+  .eg-u{
+    font-family:var(--mono); font-size:12.5px; color:var(--fg);
+    word-break:break-all; min-width:0; opacity:.92;
+  }
+
+  footer.site-foot{margin-top:26px; padding-top:18px; border-top:1px solid var(--border); text-align:center; font-size:12.5px; color:var(--faint)}
+  footer.site-foot a{color:var(--muted); text-decoration:none; border-bottom:1px solid var(--border-strong); padding-bottom:1px}
+  footer.site-foot a:hover{color:var(--accent); border-color:var(--accent)}
+
+  @media (max-width:560px){
+    body{padding:34px 15px 52px}
+    h1{font-size:21px}
+    .logo{width:40px;height:40px;border-radius:12px}
+    .badge{display:none}
+    .panel{padding:18px 16px 16px}
+    ul.eg li{flex-wrap:wrap; gap:4px}
+    .eg-k{width:100%}
+    .row .btn{flex:1; text-align:center}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important}
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.2 3.44 9.61 8.21 11.17.6.11.82-.26.82-.57 0-.28-.01-1.02-.02-2-3.34.71-4.04-1.58-4.04-1.58-.55-1.37-1.34-1.73-1.34-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.83 1.22 1.83 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.83 0-1.29.47-2.34 1.24-3.17-.12-.3-.54-1.52.12-3.16 0 0 1.01-.32 3.3 1.21a11.5 11.5 0 0 1 6 0c2.29-1.53 3.3-1.21 3.3-1.21.66 1.64.24 2.86.12 3.16.77.83 1.24 1.88 1.24 3.17 0 4.53-2.81 5.53-5.49 5.82.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.21.69.83.57A12.02 12.02 0 0 0 24 12.29C24 5.78 18.63.5 12 .5Z"/></svg>
+      </span>
+      <div>
+        <h1>GitHub 文件及 API 加速</h1>
+        <p class="sub">支持带协议头（<code>https://</code>）或不带的 GitHub 链接 · API 加速已支持</p>
+      </div>
+    </div>
+    <span class="badge">Cloudflare Workers</span>
+  </header>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>生成加速链接</h2>
+      <span class="tip">粘贴即自动转换</span>
+    </div>
+
+    <label class="field">
+      <span class="field-label">原始 GitHub 链接</span>
+      <textarea id="src" placeholder="https://github.com/owner/repo/releases/download/v1.0.0/file.zip" spellcheck="false" autocomplete="off"></textarea>
+    </label>
+
+    <label class="field" style="margin-bottom:0">
+      <span class="field-label">加速链接</span>
+      <span class="ig">
+        <input id="out" readonly placeholder="生成的加速链接会显示在这里" aria-label="加速链接">
+        <button class="btn-mini" id="copy" type="button">复制</button>
+      </span>
+    </label>
+
+    <div class="row">
+      <button class="btn" id="open" type="button">打开链接</button>
+      <button class="btn" id="clear" type="button">清空</button>
+    </div>
+
+    <p id="hint" class="hint" aria-live="polite"></p>
+    <p class="note">原理：在原始 GitHub 链接前加上本站域名即可，例如 <code>https://本站/https://github.com/...</code></p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>合法输入示例</h2>
+      <span class="tip">暂不支持文件夹下载</span>
+    </div>
+    <ul class="eg">
+      <li><span class="eg-k">分支源码</span><span class="eg-u">https://github.com/hunshcn/project/archive/master.zip</span></li>
+      <li><span class="eg-k">release 源码</span><span class="eg-u">https://github.com/hunshcn/project/archive/v0.1.0.tar.gz</span></li>
+      <li><span class="eg-k">release 文件</span><span class="eg-u">https://github.com/hunshcn/project/releases/download/v0.1.0/example.zip</span></li>
+      <li><span class="eg-k">commit 文件</span><span class="eg-u">https://github.com/hunshcn/project/blob/123/filename</span></li>
+      <li><span class="eg-k">gist</span><span class="eg-u">https://gist.githubusercontent.com/cielpy/123/raw/cmd.py</span></li>
+      <li><span class="eg-k">api</span><span class="eg-u">https://api.github.com/repos/Geekertao/CF-Workers-GitHub-Proxy</span></li>
+    </ul>
+    <p class="note"><code>blob</code>/<code>raw</code> 分支文件在开启 JsDelivr 镜像时会跳转至 cdn.jsdelivr.net。</p>
+  </section>
+
+  <footer class="site-foot">
+    运行于 <a href="https://workers.cloudflare.com/" target="_blank" rel="noopener">Cloudflare Workers</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict'
+
+  // 与 workers.js 中的 PREFIX 保持一致（默认 '/'）
+  var PREFIX = '/'
+  // 留空：使用当前页面所在域名（页面由 Worker 提供时即为 Worker 地址）。
+  // 若页面直接托管在静态站点上、与 Worker 不同域，请填写 Worker 地址，例如 'https://your-worker.workers.dev'
+  var PROXY_ORIGIN = ''
+
+  // 与 workers.js 的 ENTRY_EXPS 对齐，仅用于前端「看起来是否合法」的提示
+  var ENTRY_RE = /^(?:https?:\/\/)?(?:github\.com\/.+?\/.+?\/(?:releases|archive|blob|raw|info|git-|tags)\/|raw\.(?:githubusercontent|github)\.com\/.+?\/.+?\/.+?\/.+$|gist\.(?:githubusercontent|github)\.com\/.+?\/.+?\/.+$|api\.github\.com\/)/i
+
+  var $src  = document.getElementById('src')
+  var $out  = document.getElementById('out')
+  var $hint = document.getElementById('hint')
+  var $copy = document.getElementById('copy')
+  var $open = document.getElementById('open')
+  var $clr  = document.getElementById('clear')
+
+  function build(raw) {
+    var s = (raw || '').trim()
+    if (!s) return ''
+    s = s.replace(/^https?:\/\//i, '')       // 去掉协议头，统一由代理补回
+    var origin = (PROXY_ORIGIN || window.location.origin || '').replace(/\/+$/, '')
+    return origin + PREFIX + 'https://' + s
+  }
+
+  function render() {
+    var raw = $src.value.trim()
+    $out.value = build(raw)
+    $hint.className = 'hint'
+    if (!raw) { $hint.textContent = ''; return }
+    if (ENTRY_RE.test(raw)) {
+      $hint.className = 'hint ok'
+      $hint.textContent = '看起来是受支持的 GitHub 链接 ✓'
+    } else {
+      $hint.className = 'hint warn'
+      $hint.textContent = '该链接不在支持范围内，代理可能返回 404 或静态页面。'
+    }
+  }
+
+  function flash(msg) {
+    var old = $copy.textContent
+    $copy.textContent = msg
+    setTimeout(function () { $copy.textContent = old }, 1400)
+  }
+
+  $src.addEventListener('input', render)
+
+  $copy.addEventListener('click', function () {
+    if (!$out.value) { flash('无内容'); return }
+    function done() { flash('已复制') }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText($out.value).then(done, function () {
+        $out.select(); document.execCommand('copy'); done()
+      })
+    } else {
+      $out.select(); document.execCommand('copy'); done()
+    }
+  })
+
+  $open.addEventListener('click', function () {
+    if ($out.value) window.open($out.value, '_blank', 'noopener')
+  })
+
+  $clr.addEventListener('click', function () {
+    $src.value = ''
+    render()
+    $src.focus()
+  })
+
+  render()
+})()
+</script>
+</body>
+</html>
