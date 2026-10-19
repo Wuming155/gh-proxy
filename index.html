@@ -57,7 +57,6 @@
     -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     padding:56px 20px 72px;
   }
-  /* 氛围背景：极浅的径向色晕，纯 CSS，无外部资源 */
   body::before{
     content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
@@ -87,7 +86,6 @@
   .logo svg{width:26px; height:26px; display:block}
   h1{font-size:25px; line-height:1.25; letter-spacing:-.02em; margin:0 0 3px; font-weight:750}
   .sub{margin:0; font-size:13.5px; color:var(--muted)}
-  .sub code, .badge{font-family:var(--mono)}
   .badge{
     flex:none; display:inline-flex; align-items:center; gap:6px;
     font-size:12px; font-weight:600; color:var(--muted);
@@ -95,6 +93,15 @@
     padding:6px 11px; border-radius:999px; box-shadow:var(--shadow); white-space:nowrap;
   }
   .badge::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent)}
+
+  /* ── Tab 切换栏 ── */
+  .tabs{display:flex; gap:8px; margin-bottom:16px; background:var(--surface-2); padding:6px; border-radius:var(--radius-sm); border:1px solid var(--border);}
+  .tab-btn{
+    flex:1; background:transparent; border:none; padding:10px 14px; font:inherit; font-size:14px; font-weight:650;
+    color:var(--muted); border-radius:8px; cursor:pointer; transition:all .18s ease;
+  }
+  .tab-btn:hover{color:var(--fg)}
+  .tab-btn.active{background:var(--surface); color:var(--accent); box-shadow:0 1px 3px rgba(0,0,0,.05);}
 
   /* ── 卡片 ── */
   .panel{
@@ -117,7 +124,6 @@
   textarea{min-height:56px; resize:vertical; line-height:1.55}
   textarea::placeholder,input::placeholder{color:var(--faint)}
   textarea:focus,input:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
-  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 
   /* 输出框 + 内嵌复制按钮 */
   .ig{display:flex; align-items:stretch; gap:8px; background:var(--field); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:4px; transition:border-color .18s ease, box-shadow .18s ease}
@@ -155,6 +161,8 @@
   .note{font-size:12.5px; color:var(--faint); margin:10px 0 0}
   .note code{font-family:var(--mono)}
 
+  .hide{display:none !important}
+
   /* ── 示例列表 ── */
   ul.eg{list-style:none; margin:0; padding:0; display:grid; gap:8px}
   ul.eg li{
@@ -166,17 +174,10 @@
   }
   ul.eg li::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--accent),var(--accent-2)); opacity:.75}
   ul.eg li:hover{border-color:var(--accent); transform:translateX(2px)}
-  .eg-k{
-    flex:none; width:78px; font-size:12.5px; font-weight:650; color:var(--muted);
-  }
-  .eg-u{
-    font-family:var(--mono); font-size:12.5px; color:var(--fg);
-    word-break:break-all; min-width:0; opacity:.92;
-  }
+  .eg-k{flex:none; width:78px; font-size:12.5px; font-weight:650; color:var(--muted);}
+  .eg-u{font-family:var(--mono); font-size:12.5px; color:var(--fg); word-break:break-all; min-width:0; opacity:.92;}
 
   footer.site-foot{margin-top:26px; padding-top:18px; border-top:1px solid var(--border); text-align:center; font-size:12.5px; color:var(--faint)}
-  footer.site-foot a{color:var(--muted); text-decoration:none; border-bottom:1px solid var(--border-strong); padding-bottom:1px}
-  footer.site-foot a:hover{color:var(--accent); border-color:var(--accent)}
 
   @media (max-width:560px){
     body{padding:34px 15px 52px}
@@ -188,9 +189,6 @@
     .eg-k{width:100%}
     .row .btn{flex:1; text-align:center}
   }
-  @media (prefers-reduced-motion: reduce){
-    *{transition:none !important; animation:none !important}
-  }
 </style>
 </head>
 <body>
@@ -201,14 +199,20 @@
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.2 3.44 9.61 8.21 11.17.6.11.82-.26.82-.57 0-.28-.01-1.02-.02-2-3.34.71-4.04-1.58-4.04-1.58-.55-1.37-1.34-1.73-1.34-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.83 1.22 1.83 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.83 0-1.29.47-2.34 1.24-3.17-.12-.3-.54-1.52.12-3.16 0 0 1.01-.32 3.3 1.21a11.5 11.5 0 0 1 6 0c2.29-1.53 3.3-1.21 3.3-1.21.66 1.64.24 2.86.12 3.16.77.83 1.24 1.88 1.24 3.17 0 4.53-2.81 5.53-5.49 5.82.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.21.69.83.57A12.02 12.02 0 0 0 24 12.29C24 5.78 18.63.5 12 .5Z"/></svg>
       </span>
       <div>
-        <h1>GitHub 文件及 API 加速</h1>
-        <p class="sub">支持带协议头（<code>https://</code>）或不带的 GitHub 链接 · API 加速已支持</p>
+        <h1>GitHub 加速代理</h1>
+        <p class="sub">支持文件下载、API 加速、Git Clone 命令生成</p>
       </div>
     </div>
     <span class="badge">Cloudflare Workers</span>
   </header>
 
-  <section class="panel">
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-file">文件与 API 加速</button>
+    <button class="tab-btn" id="tab-git">Git Clone 加速</button>
+  </div>
+
+  <!-- Tab 1: 文件与 API -->
+  <section class="panel" id="panel-file">
     <div class="panel-head">
       <h2>生成加速链接</h2>
       <span class="tip">粘贴即自动转换</span>
@@ -231,25 +235,43 @@
       <button class="btn" id="open" type="button">打开链接</button>
       <button class="btn" id="clear" type="button">清空</button>
     </div>
-
     <p id="hint" class="hint" aria-live="polite"></p>
-    <p class="note">原理：在原始 GitHub 链接前加上本站域名即可，例如 <code>https://本站/https://github.com/...</code></p>
+  </section>
+
+  <!-- Tab 2: Git Clone -->
+  <section class="panel hide" id="panel-git">
+    <div class="panel-head">
+      <h2>生成 Clone 命令</h2>
+      <span class="tip">一键复制并在终端运行</span>
+    </div>
+
+    <label class="field">
+      <span class="field-label">原始仓库链接</span>
+      <textarea id="git-src" placeholder="https://github.com/Wuming155/KeePasskey.git" spellcheck="false" autocomplete="off"></textarea>
+    </label>
+
+    <label class="field" style="margin-bottom:0">
+      <span class="field-label">终端执行命令</span>
+      <span class="ig">
+        <input id="git-out" readonly placeholder="生成的 git clone 命令会显示在这里" aria-label="Git 命令">
+        <button class="btn-mini" id="git-copy" type="button">复制</button>
+      </span>
+    </label>
+    
+    <p class="note" style="margin-top:16px">
+      <strong>使用说明：</strong>复制上方命令后，直接在终端粘贴执行。该命令使用了临时的 <code>insteadOf</code> 替换方案，不会修改你的全局 Git 配置。
+    </p>
   </section>
 
   <section class="panel">
     <div class="panel-head">
       <h2>合法输入示例</h2>
-      <span class="tip">暂不支持文件夹下载</span>
     </div>
     <ul class="eg">
       <li><span class="eg-k">分支源码</span><span class="eg-u">https://github.com/hunshcn/project/archive/master.zip</span></li>
-      <li><span class="eg-k">release 源码</span><span class="eg-u">https://github.com/hunshcn/project/archive/v0.1.0.tar.gz</span></li>
       <li><span class="eg-k">release 文件</span><span class="eg-u">https://github.com/hunshcn/project/releases/download/v0.1.0/example.zip</span></li>
-      <li><span class="eg-k">commit 文件</span><span class="eg-u">https://github.com/hunshcn/project/blob/123/filename</span></li>
-      <li><span class="eg-k">gist</span><span class="eg-u">https://gist.githubusercontent.com/cielpy/123/raw/cmd.py</span></li>
-      <li><span class="eg-k">api</span><span class="eg-u">https://api.github.com/repos/Geekertao/CF-Workers-GitHub-Proxy</span></li>
+      <li><span class="eg-k">api 请求</span><span class="eg-u">https://api.github.com/repos/Geekertao/CF-Workers-GitHub-Proxy</span></li>
     </ul>
-    <p class="note"><code>blob</code>/<code>raw</code> 分支文件在开启 JsDelivr 镜像时会跳转至 cdn.jsdelivr.net。</p>
   </section>
 
   <footer class="site-foot">
@@ -261,28 +283,61 @@
 (function () {
   'use strict'
 
-  // 与 workers.js 中的 PREFIX 保持一致（默认 '/'）
   var PREFIX = '/'
-  // 留空：使用当前页面所在域名（页面由 Worker 提供时即为 Worker 地址）。
-  // 若页面直接托管在静态站点上、与 Worker 不同域，请填写 Worker 地址，例如 'https://your-worker.workers.dev'
   var PROXY_ORIGIN = ''
 
-  // 与 workers.js 的 ENTRY_EXPS 对齐，仅用于前端「看起来是否合法」的提示
-  var ENTRY_RE = /^(?:https?:\/\/)?(?:github\.com\/.+?\/.+?\/(?:releases|archive|blob|raw|info|git-|tags)\/|raw\.(?:githubusercontent|github)\.com\/.+?\/.+?\/.+?\/.+$|gist\.(?:githubusercontent|github)\.com\/.+?\/.+?\/.+$|api\.github\.com\/)/i
+  // 获取当前域名
+  function getOrigin() {
+    return (PROXY_ORIGIN || window.location.origin || '').replace(/\/+$/, '')
+  }
 
+  // 复制逻辑封装
+  function copyToClipboard(inputEl, btnEl) {
+    if (!inputEl.value) return;
+    function done() {
+      var old = btnEl.textContent;
+      btnEl.textContent = '已复制';
+      setTimeout(function() { btnEl.textContent = old; }, 1400);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(inputEl.value).then(done, function() {
+        inputEl.select(); document.execCommand('copy'); done();
+      });
+    } else {
+      inputEl.select(); document.execCommand('copy'); done();
+    }
+  }
+
+  // ── Tab 逻辑 ──
+  var tabFile = document.getElementById('tab-file');
+  var tabGit = document.getElementById('tab-git');
+  var panelFile = document.getElementById('panel-file');
+  var panelGit = document.getElementById('panel-git');
+
+  tabFile.addEventListener('click', function() {
+    tabFile.classList.add('active'); tabGit.classList.remove('active');
+    panelFile.classList.remove('hide'); panelGit.classList.add('hide');
+  });
+
+  tabGit.addEventListener('click', function() {
+    tabGit.classList.add('active'); tabFile.classList.remove('active');
+    panelGit.classList.remove('hide'); panelFile.classList.add('hide');
+  });
+
+  // ── 功能 1：文件与 API 加速 ──
   var $src  = document.getElementById('src')
   var $out  = document.getElementById('out')
   var $hint = document.getElementById('hint')
   var $copy = document.getElementById('copy')
   var $open = document.getElementById('open')
   var $clr  = document.getElementById('clear')
+  var ENTRY_RE = /^(?:https?:\/\/)?(?:github\.com\/.+?\/.+?\/(?:releases|archive|blob|raw|info|git-|tags)\/|raw\.(?:githubusercontent|github)\.com\/|gist\.(?:githubusercontent|github)\.com\/|api\.github\.com\/)/i
 
   function build(raw) {
     var s = (raw || '').trim()
     if (!s) return ''
-    s = s.replace(/^https?:\/\//i, '')       // 去掉协议头，统一由代理补回
-    var origin = (PROXY_ORIGIN || window.location.origin || '').replace(/\/+$/, '')
-    return origin + PREFIX + 'https://' + s
+    s = s.replace(/^https?:\/\//i, '')
+    return getOrigin() + PREFIX + 'https://' + s
   }
 
   function render() {
@@ -295,41 +350,41 @@
       $hint.textContent = '看起来是受支持的 GitHub 链接 ✓'
     } else {
       $hint.className = 'hint warn'
-      $hint.textContent = '该链接不在支持范围内，代理可能返回 404 或静态页面。'
+      $hint.textContent = '该链接不在支持范围内，代理可能返回 404。'
     }
-  }
-
-  function flash(msg) {
-    var old = $copy.textContent
-    $copy.textContent = msg
-    setTimeout(function () { $copy.textContent = old }, 1400)
   }
 
   $src.addEventListener('input', render)
+  $copy.addEventListener('click', function() { copyToClipboard($out, $copy); })
+  $open.addEventListener('click', function() { if ($out.value) window.open($out.value, '_blank', 'noopener'); })
+  $clr.addEventListener('click', function() { $src.value = ''; render(); $src.focus(); })
 
-  $copy.addEventListener('click', function () {
-    if (!$out.value) { flash('无内容'); return }
-    function done() { flash('已复制') }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText($out.value).then(done, function () {
-        $out.select(); document.execCommand('copy'); done()
-      })
-    } else {
-      $out.select(); document.execCommand('copy'); done()
-    }
-  })
+  // ── 功能 2：Git Clone 加速 ──
+  var $gitSrc = document.getElementById('git-src');
+  var $gitOut = document.getElementById('git-out');
+  var $gitCopy = document.getElementById('git-copy');
 
-  $open.addEventListener('click', function () {
-    if ($out.value) window.open($out.value, '_blank', 'noopener')
-  })
+  function renderGit() {
+    var raw = $gitSrc.value.trim();
+    if (!raw) { $gitOut.value = ''; return; }
+    
+    // 提取 .git 后缀，并补全协议头用于生成
+    var repoUrl = raw.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+    if (!repoUrl.endsWith('.git')) repoUrl += '.git';
+    
+    var fullUrl = 'https://' + repoUrl;
+    var proxyBase = getOrigin() + '/https://github.com/';
+    
+    // 生成带有临时 -c 参数的 git clone 命令（不修改全局配置）
+    var cmd = 'git -c http.sslVerify=false -c url."' + proxyBase + '".insteadOf="https://github.com/" clone ' + fullUrl;
+    $gitOut.value = cmd;
+  }
 
-  $clr.addEventListener('click', function () {
-    $src.value = ''
-    render()
-    $src.focus()
-  })
+  $gitSrc.addEventListener('input', renderGit);
+  $gitCopy.addEventListener('click', function() { copyToClipboard($gitOut, $gitCopy); });
 
-  render()
+  // 初始化
+  render();
 })()
 </script>
 </body>
