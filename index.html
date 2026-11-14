@@ -86,13 +86,6 @@
   .logo svg{width:26px; height:26px; display:block}
   h1{font-size:25px; line-height:1.25; letter-spacing:-.02em; margin:0 0 3px; font-weight:750}
   .sub{margin:0; font-size:13.5px; color:var(--muted)}
-  .badge{
-    flex:none; display:inline-flex; align-items:center; gap:6px;
-    font-size:12px; font-weight:600; color:var(--muted);
-    background:var(--surface); border:1px solid var(--border);
-    padding:6px 11px; border-radius:999px; box-shadow:var(--shadow); white-space:nowrap;
-  }
-  .badge::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent)}
 
   /* ── Tab 切换栏 ── */
   .tabs{display:flex; gap:8px; margin-bottom:16px; background:var(--surface-2); padding:6px; border-radius:var(--radius-sm); border:1px solid var(--border);}
@@ -177,13 +170,10 @@
   .eg-k{flex:none; width:78px; font-size:12.5px; font-weight:650; color:var(--muted);}
   .eg-u{font-family:var(--mono); font-size:12.5px; color:var(--fg); word-break:break-all; min-width:0; opacity:.92;}
 
-  footer.site-foot{margin-top:26px; padding-top:18px; border-top:1px solid var(--border); text-align:center; font-size:12.5px; color:var(--faint)}
-
   @media (max-width:560px){
     body{padding:34px 15px 52px}
     h1{font-size:21px}
     .logo{width:40px;height:40px;border-radius:12px}
-    .badge{display:none}
     .panel{padding:18px 16px 16px}
     ul.eg li{flex-wrap:wrap; gap:4px}
     .eg-k{width:100%}
@@ -203,7 +193,6 @@
         <p class="sub">支持文件下载、API 加速、Git Clone 命令生成</p>
       </div>
     </div>
-    <span class="badge">Cloudflare Workers</span>
   </header>
 
   <div class="tabs">
@@ -273,10 +262,6 @@
       <li><span class="eg-k">api 请求</span><span class="eg-u">https://api.github.com/repos/Geekertao/CF-Workers-GitHub-Proxy</span></li>
     </ul>
   </section>
-
-  <footer class="site-foot">
-    运行于 <a href="https://workers.cloudflare.com/" target="_blank" rel="noopener">Cloudflare Workers</a>
-  </footer>
 </main>
 
 <script>
